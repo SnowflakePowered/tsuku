@@ -8,25 +8,40 @@ namespace Tsuku
 {
     internal static class DataAssertions
     {
-        public static bool CheckNameLength(string name)
+        private static bool CheckNameLength(string name)
         {
-            return name.Length <= 192;
+            return name.Length <= Tsuku.MAX_NAME_LEN;
         }
 
-        public static bool CheckNameValid(string name)
+        private static bool CheckNameValid(string name)
         {
             return !String.IsNullOrWhiteSpace(name) && (name.IndexOfAny(Path.GetInvalidFileNameChars()) == -1);
         }
 
-        public static bool CheckDataLength(ReadOnlySpan<byte> span)
+        private static bool CheckDataLength(ReadOnlySpan<byte> span)
         {
             return span.Length <= Tsuku.MAX_ATTR_SIZE;
         }
 
         /// <summary>
+        /// Check that the outputs are valid for reading and writing.
+        /// 
+        /// Ensures that <paramref name="name"/> is less than or equal to <see cref="Tsuku.MAX_NAME_LEN"/> characters, and the size of the
+        /// <paramref name="data"/> buffer is less than <see cref="Tsuku.MAX_ATTR_SIZE"/>.
+        /// </summary>
+        /// <param name="name">The name of the attribute.</param>
+        public static void CheckReadValidity(string name)
+        {
+            if (!DataAssertions.CheckNameLength(name))
+                throw new ArgumentException($"Attribute name is longer than {Tsuku.MAX_NAME_LEN} characters.");
+            if (!DataAssertions.CheckNameValid(name))
+                throw new ArgumentException("Attribute name contains invalid characters.");
+        }
+
+        /// <summary>
         /// Check that the inputs are valid for reading and writing.
         /// 
-        /// Ensures that <paramref name="name"/> is less than or equal to 192 characters, and the size of the
+        /// Ensures that <paramref name="name"/> is less than or equal to <see cref="Tsuku.MAX_NAME_LEN"/> characters, and the size of the
         /// <paramref name="data"/> buffer is less than <see cref="Tsuku.MAX_ATTR_SIZE"/>.
         /// </summary>
         /// <param name="name">The name of the attribute.</param>
@@ -34,7 +49,7 @@ namespace Tsuku
         public static void CheckValidity(string name, ReadOnlySpan<byte> data)
         {
             if (!DataAssertions.CheckNameLength(name))
-                throw new ArgumentException("Attribute name is longer than 192 characters.");
+                throw new ArgumentException($"Attribute name is longer than {Tsuku.MAX_NAME_LEN} characters.");
             if (!DataAssertions.CheckNameValid(name))
                 throw new ArgumentException("Attribute name contains invalid characters.");
             if (!DataAssertions.CheckDataLength(data))

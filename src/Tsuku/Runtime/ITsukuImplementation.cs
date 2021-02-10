@@ -27,7 +27,7 @@ namespace Tsuku.Runtime
         /// </param>
         /// <param name="followSymlinks">
         /// If <see langword="true"/>, writes the attribute to the resolved target of the symbolic link. 
-        /// Otherwise, if <see cref="false"/>, writes the attribute to the link itself.</param>
+        /// Otherwise, if <see langword="false"/>, writes the attribute to the link itself.</param>
         void Write(FileInfo info, string name, byte[] data, bool followSymlinks)
             => Write(info, name, (ReadOnlySpan<byte>)data, followSymlinks);
 
@@ -43,7 +43,7 @@ namespace Tsuku.Runtime
         /// </param>
         /// <param name="followSymlinks">
         /// If <see langword="true"/>, writes the attribute to the resolved target of the symbolic link. 
-        /// Otherwise, if <see cref="false"/>, writes the attribute to the link itself.</param>
+        /// Otherwise, if <see langword="false"/>, writes the attribute to the link itself.</param>
         void Write(FileInfo info, string name, ReadOnlySpan<byte> data, bool followSymlinks)
             => Write(info, name, data.ToArray(), followSymlinks);
 
@@ -58,7 +58,7 @@ namespace Tsuku.Runtime
         /// </param>
         /// <param name="followSymlinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
-        /// Otherwise, if <see cref="false"/>, reads the attribute from the link itself.</param>
+        /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.</param>
         /// <returns>The number of bytes read. At most <see cref="Tsuku.MAX_ATTR_SIZE"/>.</returns>
         int Read(FileInfo info, string name, ref Span<byte> data, bool followSymlinks)
         {
@@ -80,14 +80,15 @@ namespace Tsuku.Runtime
         /// </param>
         /// <param name="followSymlinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
-        /// Otherwise, if <see cref="false"/>, reads the attribute from the link itself.</param>
+        /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.
+        /// </param>
         /// <returns>The number of bytes read. At most <see cref="Tsuku.MAX_ATTR_SIZE"/>.</returns>
         int Read(FileInfo info, string name, byte[] data, bool followSymlinks)
         {
             var span = data.AsSpan();
             return this.Read(info, name, ref span, followSymlinks);
         }
-            
+
 
         /// <summary>
         /// Enumerates attribute information.
@@ -95,7 +96,7 @@ namespace Tsuku.Runtime
         /// <param name="info">The <see cref="FileInfo"/> to read.</param>
         /// <param name="followSymlinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
-        /// Otherwise, if <see cref="false"/>, reads the attribute from the link itself.</param>
+        /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.</param>
         /// <returns></returns>
         IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info, bool followSymlinks);
     }

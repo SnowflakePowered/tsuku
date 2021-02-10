@@ -9,6 +9,9 @@ namespace Tsuku.Runtime
 {
     internal class NtfsAlternateDataStreams : ITsukuImplementation
     {
+        private static bool IsSymbolicLink(FileInfo @this)
+            => @this.Attributes.HasFlag(FileAttributes.ReparsePoint);
+
         public void Write(FileInfo info, string name, ReadOnlySpan<byte> data, bool followSymlinks)
         {
             using Kernel32.SafeHFILE handle = 
@@ -46,14 +49,15 @@ namespace Tsuku.Runtime
                 Kernel32.GetLastError().ThrowIfFailed();
             }
 
+            int maxRead = Math.Min(data.Length, Tsuku.MAX_ATTR_SIZE);
             // Kernel32.SafeHFILE should close after on dispose.
             using var stream = new FileStream(new SafeFileHandle(handle.DangerousGetHandle(), false), FileAccess.Read);
-            return stream.Read(data);
+            return stream.Read(data[..maxRead]);
         }
 
         public IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info, bool followSymlinks)
         {
-            if (followSymlinks && info.IsSymbolicLink())
+            if (followSymlinks && IsSymbolicLink(info))
             {
                 // If we follow the symbolic link, we need to resolve it.
                 using Kernel32.SafeHFILE handle = Kernel32

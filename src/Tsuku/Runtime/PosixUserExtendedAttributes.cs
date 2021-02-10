@@ -60,6 +60,7 @@ namespace Tsuku.Runtime
                 true => (int)Syscall.getxattr(info.FullName, $"user.tsuku.{name}", data, (ulong)maxRead),
                 false => (int)Syscall.lgetxattr(info.FullName, $"user.tsuku.{name}", data, (ulong)maxRead)
             };
+            ThrowIfFailed(read);
             return read;
         }
 
