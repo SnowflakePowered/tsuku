@@ -19,6 +19,7 @@ namespace Tsuku
             { (OSPlatform.Windows, "NTFS"), WINDOWS_NTFS },
             { (OSPlatform.Linux, "ext4"), UNIX_XATTR },
             { (OSPlatform.Linux, "ext3"), UNIX_XATTR },
+            { (OSPlatform.Linux, "ext2"), UNIX_XATTR },
             { (OSPlatform.Linux, "btrfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "apfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "hfsplus"), UNIX_XATTR },
