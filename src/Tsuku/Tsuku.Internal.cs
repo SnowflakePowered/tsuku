@@ -32,16 +32,18 @@ namespace Tsuku
             FileInfo fileInfo = @this;
             if (@this.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
-                
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     SymlinkResolver.ResolveSymlinkWinApi(ref fileInfo);
                 }
-                if (Environment.OSVersion.Platform == PlatformID.Unix)
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     SymlinkResolver.ResolveSymlinkPosix(ref fileInfo);
                 }
-                throw new PlatformNotSupportedException("Unable to resolve symbolic link.");
+                else 
+                {
+                    throw new PlatformNotSupportedException("Unable to resolve symbolic link.");
+                }
             }
 
             var rootDir = fileInfo.Directory.Root;
