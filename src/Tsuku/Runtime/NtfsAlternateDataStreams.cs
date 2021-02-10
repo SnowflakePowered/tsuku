@@ -1,5 +1,4 @@
-﻿using Emet.FileSystems;
-using Microsoft.Win32.SafeHandles;
+﻿using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
 using System.IO;

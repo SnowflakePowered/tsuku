@@ -7,9 +7,9 @@ namespace Tsuku.Runtime
 {
     class PosixUserExtendedAttributes
     {
-        internal static void WriteArgs(FileInfo info, string name, ReadOnlySpan<byte> data)
+        internal static void WriteArgs(FileInfo info, string name, byte[] data, bool followSymlinks)
         {
-            Syscall.setxattr(info.FullName, $"user.tsuku.{name}", data.ToArray(), XattrFlags.XATTR_REPLACE);
+            Syscall.setxattr(info.FullName, $"user.tsuku.{name}", data, XattrFlags.XATTR_REPLACE);
             
         }
     }

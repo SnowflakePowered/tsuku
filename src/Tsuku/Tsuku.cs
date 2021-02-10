@@ -54,19 +54,49 @@ namespace Tsuku
             throw new PlatformNotSupportedException("Unable to determine operating system.");
         }
 
-        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink=false)
+        public static void SetTsukuAttribute(this FileInfo @this, string name, byte[] data, bool followSymbolicLink = false)
         {
-           
             DataAssertions.CheckValidity(name, data);
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
-            switch (Tsuku.CheckOSSupported(@this)) 
+            Tsuku.SetTsukuAttributeInternal(@this, name, data, followSymbolicLink);
+        }
+
+        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink = false)
+        {
+            DataAssertions.CheckValidity(name, data);
+            if (!@this.Exists)
+                throw new FileNotFoundException("The requested file does not exist.");
+            Tsuku.SetTsukuAttributeInternal(@this, name, data, followSymbolicLink);
+        }
+
+        // Tiny optimization to avoid a copy on non-byte array ReadOnlySpan.
+        private static void SetTsukuAttributeInternal(FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink)
+        {
+            switch (Tsuku.CheckOSSupported(@this))
             {
                 case ("NTFS", nameof(OSPlatform.Windows)):
                     NtfsAlternateDataStreams.WriteStream(@this, name, data, followSymbolicLink);
                     break;
                 case (_, nameof(OSPlatform.Linux)):
                 case (_, nameof(OSPlatform.OSX)):
+                    PosixUserExtendedAttributes.WriteArgs(@this, name, data.ToArray(), followSymbolicLink);
+                    break;
+                default:
+                    throw new PlatformNotSupportedException("Unable to determine compatible operating system and filesystem type.");
+            }
+        }
+
+        private static void SetTsukuAttributeInternal(FileInfo @this, string name, byte[] data, bool followSymbolicLink)
+        {
+            switch (Tsuku.CheckOSSupported(@this))
+            {
+                case ("NTFS", nameof(OSPlatform.Windows)):
+                    NtfsAlternateDataStreams.WriteStream(@this, name, data, followSymbolicLink);
+                    break;
+                case (_, nameof(OSPlatform.Linux)):
+                case (_, nameof(OSPlatform.OSX)):
+                    PosixUserExtendedAttributes.WriteArgs(@this, name, data, followSymbolicLink);
                     break;
                 default:
                     throw new PlatformNotSupportedException("Unable to determine compatible operating system and filesystem type.");
