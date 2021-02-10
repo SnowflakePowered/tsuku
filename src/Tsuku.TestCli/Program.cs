@@ -24,7 +24,7 @@ namespace Tsuku.TestCli
                 Console.WriteLine($"{fName}: {fSize} -- {fString}");
             }
 
-            fi2.DeleteAttribtue("SymlinkAttr");
+            fi2.DeleteAttribute("SymlinkAttr");
             Console.WriteLine("deleted..");
             foreach ((string fName, long fSize) in fi.EnumerateAttributeInfos())
             {

@@ -6,21 +6,22 @@ On Linux and MacOS, this is handled via `getxattr` and `setxattr`. On Windows, a
 
 Note that this is not a full ADS library. The max size of attributes is forcibly limited to 4 kilobytes. Attribute names are also limited to 192 characters max, and are prefixed with '`tsuku`' across all platforms. tsuku only handles file attributes created by tsuku, for safety reasons.
 
-tsuku's API is very simple.
+tsuku's API is very simple and easy to understand.
 
 ```csharp
-public class TsukuAttributeInfo 
+public struct TsukuAttributeInfo 
 {
-    string Name { get; }
-    int Size { get; }
+    public string Name { get; }
+    public int Size { get; }
 }
 
-public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data);
-
-public static byte[] GetTsukuAttribute(this FileInfo @this, string name);
-public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data);
-
-public static IEnumerable<TsukuAttributeInfo>GetTsukuAttributeInfos(this FileInfo @this);
+public static void SetAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data);
+public static void GetAttribute(this FileInfo @this, string name, ref Span<byte> data);
+public static byte[] GetAttribute(this FileInfo @this, string name);
+public static void DeleteAttribute(this FileInfo @this, string name);
+public static IEnumerable<TsukuAttributeInfo>GetAttributeInfos(this FileInfo @this);
 ```
+
+There are also helper extensions in `Tsuku.Extensions` for easy setting of `string`, `Guid`, and `bool` attributes.
 
 Supported filesystems are NTFS, Ext4, Btrfs. Possibly supported but untested are APFS and HFS+ attributes. Attributes are preserved across move and copy if the underlying filesystem driver supports attribute preservation.

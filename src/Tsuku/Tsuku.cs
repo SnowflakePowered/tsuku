@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using Tsuku.Runtime;
 
 namespace Tsuku
 {
@@ -47,7 +43,7 @@ namespace Tsuku
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static void DeleteAttribtue(this FileInfo @this, string name)
+        public static void DeleteAttribute(this FileInfo @this, string name)
         {
             DataAssertions.CheckReadValidity(name);
             if (!@this.Exists)

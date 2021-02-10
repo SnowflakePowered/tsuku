@@ -32,11 +32,11 @@ namespace Tsuku
             FileInfo fileInfo = @this;
             if (@this.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 {
                     SymlinkResolver.ResolveSymlinkWinApi(ref fileInfo);
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                else if (Environment.OSVersion.Platform == PlatformID.Unix)
                 {
                     SymlinkResolver.ResolveSymlinkPosix(ref fileInfo);
                 }
@@ -53,10 +53,9 @@ namespace Tsuku
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
         {
+            string fsType = fileInfo.GetFileSystem();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                string fsType = fileInfo.GetFileSystem();
-
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Windows, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
@@ -65,8 +64,6 @@ namespace Tsuku
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                string fsType = fileInfo.GetFileSystem();
-
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Linux, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on Linux");
@@ -75,7 +72,6 @@ namespace Tsuku
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                string fsType = fileInfo.GetFileSystem();
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.OSX, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on macOS");
