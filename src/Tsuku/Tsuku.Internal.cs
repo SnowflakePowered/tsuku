@@ -29,6 +29,7 @@ namespace Tsuku
 
         private static string GetFileSystem(this FileInfo @this)
         {
+            // todo: resolve symlink
             var rootDir = @this.Directory.Root;
             var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
             return drive?.DriveFormat ?? "Unknown";

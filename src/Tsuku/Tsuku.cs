@@ -19,6 +19,7 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, writes the attribute to the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, writes the attribute to the link itself.
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <exception cref="FileNotFoundException">If the file <paramref name="this"/> does not exist.</exception>
         /// <exception cref="ArgumentException">
@@ -29,12 +30,12 @@ namespace Tsuku
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static void SetAttribute(this FileInfo @this, string name, byte[] data, bool followSymbolicLinks = true)
+        public static void SetAttribute(this FileInfo @this, string name, byte[] data)
         {
             DataAssertions.CheckValidity(name, data);
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
-            Tsuku.GetImplementation(@this).Write(@this, name, data, followSymbolicLinks);
+            Tsuku.GetImplementation(@this).Write(@this, name, data);
         }
 
         /// <summary>
@@ -46,6 +47,7 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, writes the attribute to the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, writes the attribute from the link itself.
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <exception cref="FileNotFoundException">If the file <paramref name="this"/> does not exist.</exception>
         /// <exception cref="ArgumentException">
@@ -56,12 +58,12 @@ namespace Tsuku
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static void SetAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLinks = true)
+        public static void SetAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data)
         {
             DataAssertions.CheckValidity(name, data);
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
-            Tsuku.GetImplementation(@this).Write(@this, name, data, followSymbolicLinks);
+            Tsuku.GetImplementation(@this).Write(@this, name, data);
         }
 
         /// <summary>
@@ -72,6 +74,7 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <exception cref="FileNotFoundException">If the file <paramref name="this"/>, or attribute does not exist.</exception>
         /// <exception cref="ArgumentException">
@@ -81,14 +84,14 @@ namespace Tsuku
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static byte[] GetAttribute(this FileInfo @this, string name, bool followSymbolicLinks = true)
+        public static byte[] GetAttribute(this FileInfo @this, string name)
         {
             Span<byte> data = stackalloc byte[Tsuku.MAX_ATTR_SIZE];
             data.Clear();
             DataAssertions.CheckValidity(name, data);
 
             int readBytes = Tsuku.GetImplementation(@this)
-                .Read(@this, name, ref data, followSymbolicLinks);
+                .Read(@this, name, ref data);
 
             byte[] buf = new byte[readBytes];
             
@@ -105,6 +108,7 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <exception cref="FileNotFoundException">If the file <paramref name="this"/>, or attribute does not exist.</exception>
         /// <exception cref="ArgumentException">
@@ -116,11 +120,11 @@ namespace Tsuku
         /// current operating system.
         /// </exception>
         /// <returns>The number of bytes read.</returns>
-        public static int GetAttribute(this FileInfo @this, string name, ref Span<byte> data, bool followSymbolicLinks = true)
+        public static int GetAttribute(this FileInfo @this, string name, ref Span<byte> data)
         {
             DataAssertions.CheckReadValidity(name);
             return Tsuku.GetImplementation(@this)
-                      .Read(@this, name, ref data, followSymbolicLinks);
+                      .Read(@this, name, ref data);
         }
 
         /// <summary>
@@ -132,13 +136,14 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <returns><see langword="true"/> if the read succeeded, <see langword="false"/> otherwise.</returns>
-        public static bool TryGetAttribute(this FileInfo @this, string name, ref Span<byte> result, bool followSymbolicLinks = true)
+        public static bool TryGetAttribute(this FileInfo @this, string name, ref Span<byte> result)
         {
             try
             {
-                @this.GetAttribute(name, ref result, followSymbolicLinks);
+                @this.GetAttribute(name, ref result);
                 return true;
             }
             catch 
@@ -157,14 +162,16 @@ namespace Tsuku
         /// <param name="followSymbolicLinks">
         /// If <see langword="true"/>, reads the attribute from the resolved target of the symbolic link. 
         /// Otherwise, if <see langword="false"/>, reads the attribute from the link itself.
+        /// 
+        /// Setting this to <see langword="false"/> is unsupported on Linux.
         /// </param>     
         /// <returns>A list of <see cref="TsukuAttributeInfo"/> objects for the file.</returns>
-        public static IEnumerable<TsukuAttributeInfo> EnumerateAttributeInfos(this FileInfo @this, bool followSymbolicLinks = true)
+        public static IEnumerable<TsukuAttributeInfo> EnumerateAttributeInfos(this FileInfo @this)
         {
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
 
-            return Tsuku.GetImplementation(@this).ListInfos(@this, followSymbolicLinks);
+            return Tsuku.GetImplementation(@this).ListInfos(@this);
         }
     }
 }

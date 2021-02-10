@@ -27,10 +27,10 @@ namespace Tsuku.Extensions
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static void SetAttribute(this FileInfo @this, string name, string data, bool followSymbolicLinks = true)
+        public static void SetAttribute(this FileInfo @this, string name, string data)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(data);
-            @this.SetAttribute(name, bytes, followSymbolicLinks);
+            @this.SetAttribute(name, bytes);
         }
 
         /// <summary>
@@ -51,11 +51,11 @@ namespace Tsuku.Extensions
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static string GetStringAttribute(this FileInfo @this, string name, bool followSymbolicLinks = true)
+        public static string GetStringAttribute(this FileInfo @this, string name)
         {
             Span<byte> data = stackalloc byte[Tsuku.MAX_ATTR_SIZE];
             data.Clear();
-            @this.GetAttribute(name, ref data, followSymbolicLinks);
+            @this.GetAttribute(name, ref data);
             return Encoding.UTF8.GetString(data);
         }
 
@@ -75,11 +75,11 @@ namespace Tsuku.Extensions
         /// If <see cref="TryGetStringAttribute(FileInfo, string, out string?, bool)"/> returns <see langword="false"/>, 
         /// then <paramref name="result"/> will be <see langword="null"/>.
         /// </returns>
-        public static bool TryGetStringAttribute(this FileInfo @this, string name, out string? result, bool followSymbolicLinks = true)
+        public static bool TryGetStringAttribute(this FileInfo @this, string name, out string? result)
         {
             try
             {
-                result = @this.GetStringAttribute(name, followSymbolicLinks);
+                result = @this.GetStringAttribute(name);
                 return true;
             }
             catch

@@ -26,10 +26,10 @@ namespace Tsuku.Extensions
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static void SetAttribute(this FileInfo @this, string name, Guid data, bool followSymbolicLinks = true)
+        public static void SetAttribute(this FileInfo @this, string name, Guid data)
         {
             byte[] bytes = data.ToByteArray();
-            @this.SetAttribute(name, bytes, followSymbolicLinks);
+            @this.SetAttribute(name, bytes);
         }
 
         /// <summary>
@@ -49,11 +49,11 @@ namespace Tsuku.Extensions
         /// If the filesystem of the file <paramref name="this"/> does not support extended attributes on the
         /// current operating system.
         /// </exception>
-        public static Guid GetGuidAttribute(this FileInfo @this, string name, bool followSymbolicLinks = true)
+        public static Guid GetGuidAttribute(this FileInfo @this, string name)
         {
             Span<byte> data = stackalloc byte[16];
             data.Clear();
-            @this.GetAttribute(name, ref data, followSymbolicLinks);
+            @this.GetAttribute(name, ref data);
             return new Guid(data);
         }
 
@@ -73,11 +73,11 @@ namespace Tsuku.Extensions
         /// If <see cref="TryGetGuidAttribute(FileInfo, string, out Guid, bool)"/> returns <see langword="false"/>, 
         /// then <paramref name="result"/> will be <see cref="Guid.Empty"/>.
         /// </returns>
-        public static bool TryGetGuidAttribute(this FileInfo @this, string name, out Guid result, bool followSymbolicLinks = true)
+        public static bool TryGetGuidAttribute(this FileInfo @this, string name, out Guid result)
         {
             try
             {
-                result = @this.GetGuidAttribute(name, followSymbolicLinks);
+                result = @this.GetGuidAttribute(name);
                 return true;
             }
             catch 

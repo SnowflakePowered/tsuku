@@ -15,22 +15,15 @@ namespace Tsuku.TestCli
             fi.Create();
 
             fi.SetAttribute("Hesllo", Encoding.UTF8.GetBytes("hello world"));
-            fi2.SetAttribute("SymlinkAttr", "mySymlinkAttr", false);
+            fi2.SetAttribute("SymlinkAttr", "mySymlinkAttr");
 
 
-            foreach ((string fName, long fSize) in fi2.EnumerateAttributeInfos(true))
+            foreach ((string fName, long fSize) in fi2.EnumerateAttributeInfos())
             {
-                string fString = Encoding.UTF8.GetString(fi2.GetAttribute(fName, true));
+                string fString = Encoding.UTF8.GetString(fi2.GetAttribute(fName));
                 Console.WriteLine($"{fName}: {fSize} -- {fString}");
             }
-            Console.WriteLine("symlink===");
-            foreach ((string fName, long fSize) in fi2.EnumerateAttributeInfos(false))
-            {
-                string fString = Encoding.UTF8.GetString(fi2.GetAttribute(fName, false));
-                Console.WriteLine($"{fName}: {fSize} -- {fString}");
-            }
-
-
+           
             Console.ReadKey();
         }
     }

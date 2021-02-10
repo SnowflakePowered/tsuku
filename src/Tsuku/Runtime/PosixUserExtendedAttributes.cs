@@ -14,6 +14,7 @@ namespace Tsuku.Runtime
                 var errno = Syscall.GetLastError();
                 throw errno switch
                 {
+                    Errno.EPERM => new PlatformNotSupportedException("Unable to set attribute on a read-only file or symbolic link."),
                     Errno.E2BIG => new PlatformNotSupportedException("The target file system does not support the size of the attribute value."),
                     Errno.ENODATA => new FileNotFoundException("The requested attribute was not found."),
                     Errno.EOPNOTSUPP => new PlatformNotSupportedException("This filesystem is not supported."),
@@ -27,50 +28,40 @@ namespace Tsuku.Runtime
             }
         }
 
-        public IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info, bool followSymlinks)
+        public IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info)
         {
             string[] names;
-            int res = followSymlinks switch 
-            {
-                true => (int)Syscall.listxattr(info.FullName, out names),
-                false => (int)Syscall.llistxattr(info.FullName, out names)
-            };
-            
+            int res = (int)Syscall.listxattr(info.FullName, out names);
+
             ThrowIfFailed(res);
             foreach (string name in names)
             {
                 if (!name.StartsWith("user.tsuku."))
                     continue;
-                res = followSymlinks switch
-                {
-                    true => (int)Syscall.getxattr(info.FullName, name, null, 0),
-                    false => (int)Syscall.lgetxattr(info.FullName, name, null, 0)
-                };
+                res = (int)Syscall.getxattr(info.FullName, name, null, 0);
                 if (res == -1) 
                     continue;
                 yield return new TsukuAttributeInfo(name["user.tsuku.".Length..], res);
             }
         }
 
-        public int Read(FileInfo info, string name, byte[] data, bool followSymlinks)
+        public int Read(FileInfo info, string name, byte[] data)
         {
             int maxRead = Math.Min(data.Length, Tsuku.MAX_ATTR_SIZE);
-            int read = followSymlinks switch 
-            {
-                true => (int)Syscall.getxattr(info.FullName, $"user.tsuku.{name}", data, (ulong)maxRead),
-                false => (int)Syscall.lgetxattr(info.FullName, $"user.tsuku.{name}", data, (ulong)maxRead)
-            };
+            int read = (int)Syscall.getxattr(info.FullName, $"user.tsuku.{name}", data, (ulong)maxRead);
             ThrowIfFailed(read);
             return read;
         }
 
-        public void Write(FileInfo info, string name, byte[] data, bool followSymlinks)
+        public void Write(FileInfo info, string name, byte[] data)
         {
-            int res = followSymlinks switch
-            {
-                true => Syscall.setxattr(info.FullName, $"user.tsuku.{name}", data, XattrFlags.XATTR_AUTO),
-                false => Syscall.lsetxattr(info.FullName, $"user.tsuku.{name}", data, XattrFlags.XATTR_AUTO)
-            };
+            int res = Syscall.setxattr(info.FullName, $"user.tsuku.{name}", data, XattrFlags.XATTR_AUTO);
+            ThrowIfFailed(res);
+        }
+
+        public void Delete(FileInfo info, string name)
+        {
+            int res = Syscall.removexattr(info.FullName, $"user.tsuku.{name}");
             ThrowIfFailed(res);
         }
     }
