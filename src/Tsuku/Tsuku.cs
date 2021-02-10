@@ -28,7 +28,6 @@ namespace Tsuku
         {
             var rootDir = @this.Directory.Root;
             var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
-            Console.WriteLine(drive?.DriveFormat);
             return drive?.DriveFormat ?? "Unknown";
         }
 
@@ -37,8 +36,6 @@ namespace Tsuku
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
         {
-            Console.WriteLine(RuntimeInformation.OSDescription);
-
             string fsType = fileInfo.GetFileSystem();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -52,7 +49,7 @@ namespace Tsuku
             {
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Linux, fsType), out var impl))
                 {
-                    throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
+                    throw new PlatformNotSupportedException($"{fsType} is not supported on Linux");
                 }
                 return impl;
             }
@@ -60,7 +57,7 @@ namespace Tsuku
             {
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.OSX, fsType), out var impl))
                 {
-                    throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
+                    throw new PlatformNotSupportedException($"{fsType} is not supported on macOS");
                 }
                 return impl;
             }
