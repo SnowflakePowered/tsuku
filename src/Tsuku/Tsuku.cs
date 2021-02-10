@@ -83,8 +83,10 @@ namespace Tsuku
         {
             Span<byte> data = stackalloc byte[Tsuku.MAX_ATTR_SIZE];
             data.Clear();
+            DataAssertions.CheckValidity(name, data);
 
-            int readBytes = Tsuku.GetImplementation(@this).Read(@this, name, ref data, followSymbolicLink);
+            int readBytes = Tsuku.GetImplementation(@this)
+                .Read(@this, name, ref data, followSymbolicLink);
 
             byte[] buf = new byte[readBytes];
             
@@ -94,7 +96,11 @@ namespace Tsuku
 
         public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data, bool followSymbolicLink = true)
         {
-            try { Tsuku.GetImplementation(@this).Read(@this, name, ref data, followSymbolicLink); } catch { return false; }
+            DataAssertions.CheckValidity(name, data);
+
+            try
+            { Tsuku.GetImplementation(@this)
+                    .Read(@this, name, ref data, followSymbolicLink); } catch { return false; }
             return true;
         }
 

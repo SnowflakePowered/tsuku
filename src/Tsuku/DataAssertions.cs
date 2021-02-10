@@ -23,6 +23,14 @@ namespace Tsuku
             return span.Length <= Tsuku.MAX_ATTR_SIZE;
         }
 
+        /// <summary>
+        /// Check that the inputs are valid for reading and writing.
+        /// 
+        /// Ensures that <paramref name="name"/> is less than or equal to 192 characters, and the size of the
+        /// <paramref name="data"/> buffer is less than <see cref="Tsuku.MAX_ATTR_SIZE"/>.
+        /// </summary>
+        /// <param name="name">The name of the attribute.</param>
+        /// <param name="data">The buffer to read or write to.</param>
         public static void CheckValidity(string name, ReadOnlySpan<byte> data)
         {
             if (!DataAssertions.CheckNameLength(name))
@@ -30,7 +38,7 @@ namespace Tsuku
             if (!DataAssertions.CheckNameValid(name))
                 throw new ArgumentException("Attribute name contains invalid characters.");
             if (!DataAssertions.CheckDataLength(data))
-                throw new ArgumentException($"Input data is longer than {Tsuku.MAX_ATTR_SIZE} bytes.");
+                throw new ArgumentException($"Buffer is longer than {Tsuku.MAX_ATTR_SIZE} bytes.");
         }
     }
 }

@@ -21,11 +21,6 @@ namespace Tsuku.TestCli
                 Console.WriteLine($"{f.Name}: {f.Size} -- {fString}");
             }
 
-            //foreach (var f in fi2.GetTsukuAttributeInfos(true))
-            //{
-            //    Console.WriteLine($"{f.Name}: {f.Size}");
-            //}
-
             Console.ReadKey();
         }
     }
