@@ -18,6 +18,7 @@ namespace Tsuku
         {
             { (OSPlatform.Windows, "NTFS"), WINDOWS_NTFS },
             { (OSPlatform.Linux, "ext4"), UNIX_XATTR },
+            { (OSPlatform.Linux, "ext3"), UNIX_XATTR },
             { (OSPlatform.Linux, "btrfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "apfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "hfsplus"), UNIX_XATTR },
@@ -27,6 +28,7 @@ namespace Tsuku
         {
             var rootDir = @this.Directory.Root;
             var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
+            Console.WriteLine(drive?.DriveFormat);
             return drive?.DriveFormat ?? "Unknown";
         }
 
@@ -35,6 +37,8 @@ namespace Tsuku
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
         {
+            Console.WriteLine(RuntimeInformation.OSDescription);
+
             string fsType = fileInfo.GetFileSystem();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
