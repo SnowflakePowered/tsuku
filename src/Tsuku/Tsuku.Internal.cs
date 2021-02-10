@@ -29,17 +29,32 @@ namespace Tsuku
 
         private static string GetFileSystem(this FileInfo @this)
         {
-            // todo: resolve symlink
-            var rootDir = @this.Directory.Root;
+            FileInfo fileInfo = @this;
+            if (@this.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    SymlinkResolver.ResolveSymlinkWinApi(ref fileInfo);
+                }
+                if (Environment.OSVersion.Platform == PlatformID.Unix)
+                {
+                    SymlinkResolver.ResolveSymlinkPosix(ref fileInfo);
+                }
+                throw new PlatformNotSupportedException("Unable to resolve symbolic link.");
+            }
+
+            var rootDir = fileInfo.Directory.Root;
             var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
             return drive?.DriveFormat ?? "Unknown";
         }
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
         {
-            string fsType = fileInfo.GetFileSystem();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                string fsType = fileInfo.GetFileSystem();
+
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Windows, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
@@ -48,6 +63,8 @@ namespace Tsuku
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+                string fsType = fileInfo.GetFileSystem();
+
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Linux, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on Linux");
@@ -56,6 +73,7 @@ namespace Tsuku
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                string fsType = fileInfo.GetFileSystem();
                 if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.OSX, fsType), out var impl))
                 {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on macOS");

@@ -23,7 +23,15 @@ namespace Tsuku.TestCli
                 string fString = Encoding.UTF8.GetString(fi2.GetAttribute(fName));
                 Console.WriteLine($"{fName}: {fSize} -- {fString}");
             }
-           
+
+            fi2.DeleteAttribtue("SymlinkAttr");
+            Console.WriteLine("deleted..");
+            foreach ((string fName, long fSize) in fi.EnumerateAttributeInfos())
+            {
+                string fString = Encoding.UTF8.GetString(fi2.GetAttribute(fName));
+                Console.WriteLine($"{fName}: {fSize} -- {fString}");
+            }
+
             Console.ReadKey();
         }
     }

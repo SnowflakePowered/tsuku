@@ -19,7 +19,7 @@ namespace Tsuku.Runtime
                     Errno.ENODATA => new FileNotFoundException("The requested attribute was not found."),
                     Errno.EOPNOTSUPP => new PlatformNotSupportedException("This filesystem is not supported."),
                     Errno.ERANGE => new ArgumentException("Buffer was too small."),
-                    Errno.EACCES => new UnauthorizedAccessException("The caller does not have the required permission"),
+                    Errno.EACCES => new UnauthorizedAccessException("The caller does not have the required permission."),
                     Errno.ENOENT => new FileNotFoundException($"The specified file was not found."),
                     Errno.ENOTDIR => new DirectoryNotFoundException("The specified path is invalid."),
                     Errno.ENAMETOOLONG => new PathTooLongException("The specified path, file name, or both exceed the system-defined maximum length."),
