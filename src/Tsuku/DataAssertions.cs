@@ -20,7 +20,7 @@ namespace Tsuku
 
         public static bool CheckDataLength(ReadOnlySpan<byte> span)
         {
-            return span.Length <= 4096;
+            return span.Length <= Tsuku.MAX_ATTR_SIZE;
         }
 
         public static void CheckValidity(string name, ReadOnlySpan<byte> data)
@@ -30,7 +30,7 @@ namespace Tsuku
             if (!DataAssertions.CheckNameValid(name))
                 throw new ArgumentException("Attribute name contains invalid characters.");
             if (!DataAssertions.CheckDataLength(data))
-                throw new ArgumentException("Input data is longer than 4096 bytes.");
+                throw new ArgumentException($"Input data is longer than {Tsuku.MAX_ATTR_SIZE} bytes.");
         }
     }
 }

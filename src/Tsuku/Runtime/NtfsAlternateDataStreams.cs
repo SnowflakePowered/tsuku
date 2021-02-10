@@ -7,9 +7,9 @@ using Vanara.Extensions.Reflection;
 using Vanara.PInvoke;
 namespace Tsuku.Runtime
 {
-    internal class NtfsAlternateDataStreams
+    internal class NtfsAlternateDataStreams : ITsukuImplementation
     {
-        internal static void WriteStream(FileInfo info, string name, ReadOnlySpan<byte> data, bool followSymlinks)
+        public void Write(FileInfo info, string name, ReadOnlySpan<byte> data, bool followSymlinks)
         {
             using Kernel32.SafeHFILE handle = 
                 Kernel32.CreateFile($"{info.FullName}:tsuku.{name}",
@@ -31,7 +31,7 @@ namespace Tsuku.Runtime
             stream.Flush();
         }
 
-        public static IEnumerable<TsukuAttributeInfo> GetStreamInfos(FileInfo info, bool followSymlinks)
+        public int Read(FileInfo info, string name, ref Span<byte> data, bool followSymlinks)
         {
             using Kernel32.SafeHFILE handle =
                 Kernel32.CreateFile($"{info.FullName}:tsuku.{name}",
@@ -50,13 +50,14 @@ namespace Tsuku.Runtime
             using var stream = new FileStream(new SafeFileHandle(handle.DangerousGetHandle(), false), FileAccess.Read);
             return stream.Read(data);
         }
+
+        public IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info, bool followSymlinks)
         {
             if (followSymlinks && info.IsSymbolicLink())
             {
                 // If we follow the symbolic link, we need to resolve it.
-                Kernel32.SafeHFILE handle = Kernel32
-                    .CreateFile(info.FullName, 0, 0
-                    , null, FileMode.Open, FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL);
+                using Kernel32.SafeHFILE handle = Kernel32
+                    .CreateFile(info.FullName, 0, 0, null, FileMode.Open, FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL);
 
                 if (handle == HFILE.INVALID_HANDLE_VALUE)
                 {
@@ -76,11 +77,9 @@ namespace Tsuku.Runtime
                 string? streamName = stream.GetFieldValue<string>("cStreamName");
                 if (streamName?.StartsWith(":tsuku.") == true)
                 {
-                    yield return new(info, streamName[":tsuku.".Length..^":$DATA".Length], stream.StreamSize);
+                    yield return new(streamName[":tsuku.".Length..^":$DATA".Length], stream.StreamSize);
                 }
             }
         }
-
-
     }
 }

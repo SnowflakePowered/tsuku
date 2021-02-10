@@ -10,13 +10,19 @@ namespace Tsuku
 {
     public static class Tsuku
     {
-        private static Dictionary<OSPlatform, string[]> SafeFileSystems = new()
-        {
-            { OSPlatform.Windows, new[] { "NTFS" } },
-            { OSPlatform.Linux, new[] { "ext4", "btrfs" } },
-            { OSPlatform.OSX, new[] { "hfsplus", "apfs" } },
-        };
+        public const int MAX_ATTR_SIZE = 4096;
+        private static ITsukuImplementation WINDOWS_NTFS = new NtfsAlternateDataStreams();
+        private static ITsukuImplementation UNIX_XATTR = new PosixUserExtendedAttributes();
 
+        private static Dictionary<(OSPlatform, string), ITsukuImplementation> TsukuImpls = new()
+        {
+            { (OSPlatform.Windows, "NTFS"), WINDOWS_NTFS },
+            { (OSPlatform.Linux, "ext4"), UNIX_XATTR },
+            { (OSPlatform.Linux, "btrfs"), UNIX_XATTR },
+            { (OSPlatform.OSX, "apfs"), UNIX_XATTR },
+            { (OSPlatform.OSX, "hfsplus"), UNIX_XATTR },
+
+        };
         internal static string GetFileSystem(this FileInfo @this)
         {
             var rootDir = @this.Directory.Root;
@@ -27,108 +33,77 @@ namespace Tsuku
         internal static bool IsSymbolicLink(this FileInfo @this)
             => @this.Attributes.HasFlag(FileAttributes.ReparsePoint);
 
-        private static (string, string) CheckOSSupported(FileInfo fileInfo)
+        private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
         {
             string fsType = fileInfo.GetFileSystem();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (!Tsuku.SafeFileSystems[OSPlatform.Windows]
-                        .Contains(fsType, StringComparer.InvariantCultureIgnoreCase))
+                if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Windows, fsType), out var impl))
+                {
                     throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
-                return (fsType, nameof(OSPlatform.Windows));
+                }
+                return impl;
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                if (!Tsuku.SafeFileSystems[OSPlatform.Linux]
-                        .Contains(fsType, StringComparer.InvariantCultureIgnoreCase))
-                    throw new PlatformNotSupportedException($"{fsType} is not supported on Linux");
-                return (fsType, nameof(OSPlatform.Linux));
+                if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.Linux, fsType), out var impl))
+                {
+                    throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
+                }
+                return impl;
             }
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                if (!Tsuku.SafeFileSystems[OSPlatform.OSX]
-                        .Contains(fsType, StringComparer.InvariantCultureIgnoreCase))
-                    throw new PlatformNotSupportedException($"{fsType} is not supported on macOS");
-                return (fsType, nameof(OSPlatform.OSX));
+                if (!Tsuku.TsukuImpls.TryGetValue((OSPlatform.OSX, fsType), out var impl))
+                {
+                    throw new PlatformNotSupportedException($"{fsType} is not supported on Windows");
+                }
+                return impl;
             }
             throw new PlatformNotSupportedException("Unable to determine operating system.");
         }
 
-        public static void SetTsukuAttribute(this FileInfo @this, string name, byte[] data, bool followSymbolicLink = false)
+        public static void SetTsukuAttribute(this FileInfo @this, string name, byte[] data, bool followSymbolicLink = true)
         {
             DataAssertions.CheckValidity(name, data);
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
-            Tsuku.SetTsukuAttributeInternal(@this, name, data, followSymbolicLink);
+            Tsuku.GetImplementation(@this).Write(@this, name, data, followSymbolicLink);
         }
 
-        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink = false)
+        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink = true)
         {
             DataAssertions.CheckValidity(name, data);
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
-            Tsuku.SetTsukuAttributeInternal(@this, name, data, followSymbolicLink);
+            Tsuku.GetImplementation(@this).Write(@this, name, data, followSymbolicLink);
         }
 
-        // Tiny optimization to avoid a copy on non-byte array ReadOnlySpan.
-        private static void SetTsukuAttributeInternal(FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink)
+        public static byte[] GetTsukuAttribute(this FileInfo @this, string name, bool followSymbolicLink = true)
         {
-            switch (Tsuku.CheckOSSupported(@this))
-            {
-                case ("NTFS", nameof(OSPlatform.Windows)):
-                    NtfsAlternateDataStreams.WriteStream(@this, name, data, followSymbolicLink);
-                    break;
-                case (_, nameof(OSPlatform.Linux)):
-                case (_, nameof(OSPlatform.OSX)):
-                    PosixUserExtendedAttributes.WriteArgs(@this, name, data.ToArray(), followSymbolicLink);
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Unable to determine compatible operating system and filesystem type.");
-            }
+            Span<byte> data = stackalloc byte[Tsuku.MAX_ATTR_SIZE];
+            data.Clear();
+
+            int readBytes = Tsuku.GetImplementation(@this).Read(@this, name, ref data, followSymbolicLink);
+
+            byte[] buf = new byte[readBytes];
+            
+            data[..readBytes].CopyTo(buf);
+            return buf;
         }
 
-        private static void SetTsukuAttributeInternal(FileInfo @this, string name, byte[] data, bool followSymbolicLink)
+        public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data, bool followSymbolicLink = true)
         {
-            switch (Tsuku.CheckOSSupported(@this))
-            {
-                case ("NTFS", nameof(OSPlatform.Windows)):
-                    NtfsAlternateDataStreams.WriteStream(@this, name, data, followSymbolicLink);
-                    break;
-                case (_, nameof(OSPlatform.Linux)):
-                case (_, nameof(OSPlatform.OSX)):
-                    PosixUserExtendedAttributes.WriteArgs(@this, name, data, followSymbolicLink);
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Unable to determine compatible operating system and filesystem type.");
-            }
+            try { Tsuku.GetImplementation(@this).Read(@this, name, ref data, followSymbolicLink); } catch { return false; }
+            return true;
         }
 
-        public static byte[] GetTsukuAttribute(this FileInfo @this, string name, bool followSymbolicLink=false)
-        {
-            return new byte[] { };
-        }
-
-        public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data, bool followSymbolicLink=false)
-        {
-            return false;
-        }
-
-        public static IEnumerable<TsukuAttributeInfo> GetTsukuAttributeInfos(this FileInfo @this, bool followSymbolicLink = false)
+        public static IEnumerable<TsukuAttributeInfo> GetTsukuAttributeInfos(this FileInfo @this, bool followSymbolicLink = true)
         {
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
 
-            switch (Tsuku.CheckOSSupported(@this))
-            {
-                case ("NTFS", nameof(OSPlatform.Windows)):
-                    return NtfsAlternateDataStreams.GetStreamInfos(@this, followSymbolicLink);
-                case (_, nameof(OSPlatform.Linux)):
-                case (_, nameof(OSPlatform.OSX)):
-                    break;
-                default:
-                    throw new PlatformNotSupportedException("Unable to determine compatible operating system and filesystem type.");
-            }
-            return new TsukuAttributeInfo[] { };
+            return Tsuku.GetImplementation(@this).ListInfos(@this, followSymbolicLink);
         }
     }
 }

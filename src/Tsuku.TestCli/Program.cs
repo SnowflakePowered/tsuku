@@ -10,15 +10,15 @@ namespace Tsuku.TestCli
         {
             Console.WriteLine("Hello World!");
             var fi = new FileInfo("tst.txt");
-            var fi2 = new FileInfo("tst.symlink.txt");
+            fi.Create();
 
             fi.SetTsukuAttribute("Hesllo", Encoding.UTF8.GetBytes("hello world"));
-            fi2.SetTsukuAttribute("Wosrld", Encoding.UTF8.GetBytes("goodbye worldshjhd"));
 
 
-            foreach (var f in fi2.GetTsukuAttributeInfos(false))
+            foreach (var f in fi.GetTsukuAttributeInfos(true))
             {
-                Console.WriteLine($"{f.Name}: {f.Size}");
+                string fString = Encoding.UTF8.GetString(fi.GetTsukuAttribute(f.Name, true));
+                Console.WriteLine($"{f.Name}: {f.Size} -- {fString}");
             }
 
             //foreach (var f in fi2.GetTsukuAttributeInfos(true))

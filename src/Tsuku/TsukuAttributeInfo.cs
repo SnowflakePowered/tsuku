@@ -7,8 +7,7 @@ namespace Tsuku
 {
     public sealed class TsukuAttributeInfo
     {
-        internal TsukuAttributeInfo(FileInfo file, string name, long size) => (this.File, this.Name, this.Size) = (file, name, size);
-        public FileInfo File { get; }
+        internal TsukuAttributeInfo(string name, long size) => (this.Name, this.Size) = (name, size);
         public string Name { get; }
         public long Size { get; }
     }
