@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Tsuku.Runtime;
+
 namespace Tsuku
 {
     public static class Tsuku
@@ -21,6 +23,9 @@ namespace Tsuku
             var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
             return drive?.DriveFormat ?? "Unknown";
         }
+
+        internal static bool IsSymbolicLink(this FileInfo @this)
+            => @this.Attributes.HasFlag(FileAttributes.ReparsePoint);
 
         private static (string, string) CheckOSSupported(FileInfo fileInfo)
         {
@@ -49,14 +54,16 @@ namespace Tsuku
             throw new PlatformNotSupportedException("Unable to determine operating system.");
         }
 
-        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data)
+        public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data, bool followSymbolicLink=false)
         {
-            DataAssertions.CheckValidity(@this, name, data);
-
+           
+            DataAssertions.CheckValidity(name, data);
+            if (!@this.Exists)
+                throw new FileNotFoundException("The requested file does not exist.");
             switch (Tsuku.CheckOSSupported(@this)) 
             {
                 case ("NTFS", nameof(OSPlatform.Windows)):
-                    NtfsAlternateDataStreams.WriteStream(@this, name, data);
+                    NtfsAlternateDataStreams.WriteStream(@this, name, data, followSymbolicLink);
                     break;
                 case (_, nameof(OSPlatform.Linux)):
                 case (_, nameof(OSPlatform.OSX)):
@@ -66,17 +73,17 @@ namespace Tsuku
             }
         }
 
-        public static byte[] GetTsukuAttribute(this FileInfo @this, string name)
+        public static byte[] GetTsukuAttribute(this FileInfo @this, string name, bool followSymbolicLink=false)
         {
             return new byte[] { };
         }
 
-        public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data)
+        public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data, bool followSymbolicLink=false)
         {
             return false;
         }
 
-        public static IEnumerable<TsukuAttributeInfo> GetTsukuAttributeInfos(this FileInfo @this)
+        public static IEnumerable<TsukuAttributeInfo> GetTsukuAttributeInfos(this FileInfo @this, bool followSymbolicLink = false)
         {
             if (!@this.Exists)
                 throw new FileNotFoundException("The requested file does not exist.");
@@ -84,7 +91,7 @@ namespace Tsuku
             switch (Tsuku.CheckOSSupported(@this))
             {
                 case ("NTFS", nameof(OSPlatform.Windows)):
-                    return NtfsAlternateDataStreams.GetStreamInfos(@this);
+                    return NtfsAlternateDataStreams.GetStreamInfos(@this, followSymbolicLink);
                 case (_, nameof(OSPlatform.Linux)):
                 case (_, nameof(OSPlatform.OSX)):
                     break;

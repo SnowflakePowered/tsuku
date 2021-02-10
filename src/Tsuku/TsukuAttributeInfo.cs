@@ -12,5 +12,4 @@ namespace Tsuku
         public string Name { get; }
         public long Size { get; }
     }
-
 }

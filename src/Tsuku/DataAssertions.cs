@@ -23,10 +23,8 @@ namespace Tsuku
             return span.Length <= 4096;
         }
 
-        public static void CheckValidity(FileInfo info, string name, ReadOnlySpan<byte> data)
+        public static void CheckValidity(string name, ReadOnlySpan<byte> data)
         {
-            if (!info.Exists)
-                throw new FileNotFoundException("The requested file does not exist.");
             if (!DataAssertions.CheckNameLength(name))
                 throw new ArgumentException("Attribute name is longer than 192 characters.");
             if (!DataAssertions.CheckNameValid(name))
