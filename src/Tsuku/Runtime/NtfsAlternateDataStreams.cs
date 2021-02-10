@@ -33,6 +33,24 @@ namespace Tsuku.Runtime
 
         public static IEnumerable<TsukuAttributeInfo> GetStreamInfos(FileInfo info, bool followSymlinks)
         {
+            using Kernel32.SafeHFILE handle =
+                Kernel32.CreateFile($"{info.FullName}:tsuku.{name}",
+                Kernel32.FileAccess.FILE_GENERIC_READ,
+                FileShare.Read, null, FileMode.Open,
+                followSymlinks // if not follow symlinks, directly open the symlink data.
+                    ? FileFlagsAndAttributes.FILE_ATTRIBUTE_NORMAL
+                    : FileFlagsAndAttributes.FILE_FLAG_OPEN_REPARSE_POINT);
+
+            if (handle == HFILE.INVALID_HANDLE_VALUE)
+            {
+                Kernel32.GetLastError().ThrowIfFailed();
+            }
+
+            // Kernel32.SafeHFILE should close after on dispose.
+            using var stream = new FileStream(new SafeFileHandle(handle.DangerousGetHandle(), false), FileAccess.Read);
+            return stream.Read(data);
+        }
+        {
             if (followSymlinks && info.IsSymbolicLink())
             {
                 // If we follow the symbolic link, we need to resolve it.
