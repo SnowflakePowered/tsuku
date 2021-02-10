@@ -18,9 +18,9 @@ public class TsukuAttributeInfo
 public static void SetTsukuAttribute(this FileInfo @this, string name, ReadOnlySpan<byte> data);
 
 public static byte[] GetTsukuAttribute(this FileInfo @this, string name);
-public static bool TryGetTsukuAttribute(this FileInfo @this, string name, out Span<byte> data);
+public static bool TryGetTsukuAttribute(this FileInfo @this, string name, ref Span<byte> data);
 
-public static IEnumerable<TsukuAttriubteInfo>GetTsukuAttributeInfos(this FileInfo @this);
+public static IEnumerable<TsukuAttributeInfo>GetTsukuAttributeInfos(this FileInfo @this);
 ```
 
 Supported filesystems are NTFS, Ext4, Btrfs. Possibly supported but untested are APFS and HFS+ attributes. Attributes are preserved across move and copy if the underlying filesystem driver supports attribute preservation.
