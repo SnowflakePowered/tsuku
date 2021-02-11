@@ -52,7 +52,10 @@ namespace Tsuku.Runtime
                 Kernel32.MAX_PATH, Kernel32.FinalPathNameOptions.FILE_NAME_NORMALIZED);
             Kernel32.GetLastError().ThrowIfFailed();
 
-            info = new FileInfo(fullPath.ToString());
+            string filePath = fullPath.ToString();
+            info = new FileInfo(filePath.StartsWith(@"\\?\") 
+                ? filePath[@"\\?\".Length..]
+                : filePath);
         }
     }
 }

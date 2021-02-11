@@ -10,7 +10,14 @@ namespace Tsuku
 {
     public static partial class Tsuku
     {
+        /// <summary>
+        /// The maximum size of an attribute data in bytes.
+        /// </summary>
         public const int MAX_ATTR_SIZE = 4096;
+
+        /// <summary>
+        /// The maximum length of an attribute name, in characters.
+        /// </summary>
         public const int MAX_NAME_LEN = 192;
         
         private static ITsukuImplementation WINDOWS_NTFS = new NtfsAlternateDataStreams();

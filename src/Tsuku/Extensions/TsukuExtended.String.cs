@@ -55,8 +55,8 @@ namespace Tsuku.Extensions
         {
             Span<byte> data = stackalloc byte[Tsuku.MAX_ATTR_SIZE];
             data.Clear();
-            @this.GetAttribute(name, ref data);
-            return Encoding.UTF8.GetString(data);
+            int read = @this.GetAttribute(name, ref data);
+            return Encoding.UTF8.GetString(data[..read]);
         }
 
         /// <summary>
