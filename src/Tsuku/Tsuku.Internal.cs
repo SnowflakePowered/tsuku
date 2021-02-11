@@ -63,7 +63,7 @@ namespace Tsuku
             {
                 return NativeFilesystemHelper.GetDarwinFilesystem(fileInfo);
             }
-            throw new PlatformNotSupportedException("Unable to resolve symbolic link.");
+            throw new PlatformNotSupportedException("No implementations exist for this operating system.");
         }
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)
