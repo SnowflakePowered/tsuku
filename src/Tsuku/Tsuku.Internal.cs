@@ -27,7 +27,6 @@ namespace Tsuku
         {
             { (OSPlatform.Windows, "NTFS"), WINDOWS_NTFS },
             { (OSPlatform.Linux, "ext4"), UNIX_XATTR },
-            { (OSPlatform.Linux, "ext2"), UNIX_XATTR },
             { (OSPlatform.Linux, "btrfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "apfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "hfsplus"), UNIX_XATTR },
@@ -52,12 +51,19 @@ namespace Tsuku
                 }
             }
 
-            return Environment.OSVersion.Platform switch
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                PlatformID.Win32NT => NativeFilesystemHelper.GetWindowsFilesystem(fileInfo),
-                PlatformID.Unix => NativeFilesystemHelper.GetUnixFilesystem(fileInfo),
-                _ => throw new PlatformNotSupportedException(),
-            };
+                return NativeFilesystemHelper.GetWindowsFilesystem(fileInfo);
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return NativeFilesystemHelper.GetLinuxFilesystem(fileInfo);
+            }
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return NativeFilesystemHelper.GetDarwinFilesystem(fileInfo);
+            }
+            throw new PlatformNotSupportedException("Unable to resolve symbolic link.");
         }
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)

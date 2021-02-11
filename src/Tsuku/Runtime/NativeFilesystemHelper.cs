@@ -6,6 +6,7 @@ using Vanara.PInvoke;
 using Mono.Unix.Native;
 using Mono.Unix;
 using System.Linq;
+using Tsuku.Runtime.Interop;
 
 namespace Tsuku.Runtime
 {
@@ -59,21 +60,23 @@ namespace Tsuku.Runtime
                 : filePath);
         }
 
-        public static string GetUnixFilesystem(FileInfo fileInfo)
+        public static string GetDarwinFilesystem(FileInfo fileInfo)
+        {
+            Statfs.macos_statfs(fileInfo.FullName, out var statfs);
+            return statfs.f_fstypename;
+        }
+
+        public static string GetLinuxFilesystem(FileInfo fileInfo)
         {
             // https://man7.org/linux/man-pages/man2/statfs.2.html
             // https://github.com/dotnet/runtime/blob/e8339af091988247c90bd7d347753da05f7e74cd/src/libraries/Common/src/Interop/Unix/System.Native/Interop.MountPoints.FormatInfo.cs
-            Mono.Unix.Native.Syscall.statvfs(fileInfo.FullName, out var statvfs);
-
-            return statvfs.f_fsid switch
+            Statfs.linux_statfs(fileInfo.FullName, out var statfs);
+            return statfs.f_type switch
             {
                 0xef53 => "ext4",
                 0x5346544e => "NTFS",
                 0x9123683e => "btrfs",
-                0x482B => "hfsplus",
-                0x4244 => "hfs",
-                0x41505342 => "apfs",
-                ulong x => $"{x}"
+                uint i => $"Unknown ({i})"
             };
         }
 
