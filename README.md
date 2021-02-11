@@ -1,5 +1,6 @@
 # 付く tsuku
 
+[![Nuget](https://img.shields.io/nuget/v/tsuku)](https://www.nuget.org/packages/tsuku)
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SnowflakePowered/tsuku/.NET)](https://github.com/SnowflakePowered/tsuku/actions?query=workflow%3A.NET)
 [![Codecov](https://img.shields.io/codecov/c/github/SnowflakePowered/tsuku)](https://codecov.io/gh/SnowflakePowered/tsuku/branch/master)
 
