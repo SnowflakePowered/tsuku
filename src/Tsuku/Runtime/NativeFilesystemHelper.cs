@@ -64,6 +64,7 @@ namespace Tsuku.Runtime
             // https://man7.org/linux/man-pages/man2/statfs.2.html
             // https://github.com/dotnet/runtime/blob/e8339af091988247c90bd7d347753da05f7e74cd/src/libraries/Common/src/Interop/Unix/System.Native/Interop.MountPoints.FormatInfo.cs
             Mono.Unix.Native.Syscall.statvfs(fileInfo.FullName, out var statvfs);
+
             return statvfs.f_fsid switch
             {
                 0xef53 => "ext4",
@@ -72,7 +73,7 @@ namespace Tsuku.Runtime
                 0x482B => "hfsplus",
                 0x4244 => "hfs",
                 0x41505342 => "apfs",
-                _ => "Unknown"
+                ulong x => $"{x}"
             };
         }
 
