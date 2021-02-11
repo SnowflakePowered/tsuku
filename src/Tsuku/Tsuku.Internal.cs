@@ -54,7 +54,9 @@ namespace Tsuku
             }
 
             var rootDir = fileInfo.Directory.Root;
-            var drive = DriveInfo.GetDrives().Where(d => d.RootDirectory.FullName == rootDir.FullName).FirstOrDefault();
+            
+            var drive = DriveInfo.GetDrives()
+                .Where(d => d?.RootDirectory?.FullName == rootDir?.FullName).FirstOrDefault();
             return drive?.DriveFormat ?? "Unknown";
         }
 

@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix: 
-        os: [ubuntu-latest, windows-latest, macos-11.0]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -24,6 +24,7 @@ jobs:
       run: dotnet build --no-restore src
     - name: Test
       run: dotnet test --no-build --verbosity normal src
+      continue-on-error: ${{ matrix.os == 'macos-latest' }}
     - name: Upload code coverage
       uses: codecov/codecov-action@v1.2.1
       with:
