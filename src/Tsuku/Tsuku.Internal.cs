@@ -27,7 +27,6 @@ namespace Tsuku
         {
             { (OSPlatform.Windows, "NTFS"), WINDOWS_NTFS },
             { (OSPlatform.Linux, "ext4"), UNIX_XATTR },
-            { (OSPlatform.Linux, "ext3"), UNIX_XATTR },
             { (OSPlatform.Linux, "ext2"), UNIX_XATTR },
             { (OSPlatform.Linux, "btrfs"), UNIX_XATTR },
             { (OSPlatform.OSX, "apfs"), UNIX_XATTR },
@@ -41,11 +40,11 @@ namespace Tsuku
             {
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 {
-                    SymlinkResolver.ResolveSymlinkWinApi(ref fileInfo);
+                    NativeFilesystemHelper.ResolveSymlinkWinApi(ref fileInfo);
                 }
                 else if (Environment.OSVersion.Platform == PlatformID.Unix)
                 {
-                    SymlinkResolver.ResolveSymlinkPosix(ref fileInfo);
+                    NativeFilesystemHelper.ResolveSymlinkPosix(ref fileInfo);
                 }
                 else 
                 {
@@ -53,11 +52,12 @@ namespace Tsuku
                 }
             }
 
-            var rootDir = fileInfo.Directory.Root;
-            
-            var drive = DriveInfo.GetDrives()
-                .Where(d => d?.RootDirectory?.FullName == rootDir?.FullName).FirstOrDefault();
-            return drive?.DriveFormat ?? "Unknown";
+            return Environment.OSVersion.Platform switch
+            {
+                PlatformID.Win32NT => NativeFilesystemHelper.GetWindowsFilesystem(fileInfo),
+                PlatformID.Unix => NativeFilesystemHelper.GetUnixFilesystem(fileInfo),
+                _ => throw new PlatformNotSupportedException(),
+            };
         }
 
         private static ITsukuImplementation GetImplementation(FileInfo fileInfo)

@@ -5,10 +5,11 @@ using System.Text;
 using Vanara.PInvoke;
 using Mono.Unix.Native;
 using Mono.Unix;
+using System.Linq;
 
 namespace Tsuku.Runtime
 {
-    internal static class SymlinkResolver
+    internal static class NativeFilesystemHelper
     {
         private static bool IsSymbolicLink(FileInfo @this)
               => @this.Attributes.HasFlag(FileAttributes.ReparsePoint);
@@ -56,6 +57,31 @@ namespace Tsuku.Runtime
             info = new FileInfo(filePath.StartsWith(@"\\?\") 
                 ? filePath[@"\\?\".Length..]
                 : filePath);
+        }
+
+        public static string GetUnixFilesystem(FileInfo fileInfo)
+        {
+            // https://man7.org/linux/man-pages/man2/statfs.2.html
+            // https://github.com/dotnet/runtime/blob/e8339af091988247c90bd7d347753da05f7e74cd/src/libraries/Common/src/Interop/Unix/System.Native/Interop.MountPoints.FormatInfo.cs
+            Mono.Unix.Native.Syscall.statvfs(fileInfo.FullName, out var statvfs);
+            return statvfs.f_fsid switch
+            {
+                0xef53 => "ext4",
+                0x5346544e => "NTFS",
+                0x9123683e => "btrfs",
+                0x482B => "hfsplus",
+                0x4244 => "hfs",
+                0x41505342 => "apfs",
+                _ => "Unknown"
+            };
+        }
+
+        public static string GetWindowsFilesystem(FileInfo fileInfo)
+        {
+            var rootDir = fileInfo.Directory.Root;
+            var drive = DriveInfo.GetDrives()
+                .Where(d => d?.RootDirectory?.FullName == rootDir?.FullName).FirstOrDefault();
+            return drive?.DriveFormat ?? "Unknown";
         }
     }
 }

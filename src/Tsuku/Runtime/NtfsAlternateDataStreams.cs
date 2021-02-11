@@ -50,7 +50,7 @@ namespace Tsuku.Runtime
 
         public IEnumerable<TsukuAttributeInfo> ListInfos(FileInfo info)
         {
-            SymlinkResolver.ResolveSymlinkWinApi(ref info);
+            NativeFilesystemHelper.ResolveSymlinkWinApi(ref info);
 
             foreach (var stream in Kernel32.EnumFileStreams(info.FullName))
             {
