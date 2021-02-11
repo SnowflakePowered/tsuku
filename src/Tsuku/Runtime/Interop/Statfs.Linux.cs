@@ -25,7 +25,7 @@ namespace Tsuku.Runtime.Interop
                 ArraySubType = UnmanagedType.I4, SizeConst = 4)]
             uint[] f_spare;
         }
-        [DllImport("libc", SetLastError = true)]
+        [DllImport("libc", SetLastError = true, EntryPoint = "statfs")]
         public static extern int linux_statfs(string path, out LinuxStatFs buf);
     }
 }

@@ -52,7 +52,7 @@ namespace Tsuku.Runtime.Interop
                 ArraySubType = UnmanagedType.I8, SizeConst = 4)]
             long[] f_reserved4;
         }
-        [DllImport("libc", SetLastError = true)]
+        [DllImport("libc", SetLastError = true, EntryPoint = "statfs")]
         public static extern int macos_statfs(string path, out DarwinStatfs buf);
     }
 }
