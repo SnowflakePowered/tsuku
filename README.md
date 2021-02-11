@@ -1,5 +1,8 @@
 # 付く tsuku
 
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SnowflakePowered/tsuku/.NET)
+![Codecov](https://img.shields.io/codecov/c/github/SnowflakePowered/tsuku)
+
 tsuku is a C# library that makes cross-platform extended attribute access easy. 
 
 On Linux and MacOS, this is handled via `getxattr` and `setxattr`. On Windows, alternate data streams are used to imitate this feature.
