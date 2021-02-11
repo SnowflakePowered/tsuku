@@ -1,7 +1,7 @@
 # 付く tsuku
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SnowflakePowered/tsuku/.NET)
-![Codecov](https://img.shields.io/codecov/c/github/SnowflakePowered/tsuku)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SnowflakePowered/tsuku/.NET)](https://github.com/SnowflakePowered/tsuku/actions?query=workflow%3A.NET)
+[![Codecov](https://img.shields.io/codecov/c/github/SnowflakePowered/tsuku)](https://codecov.io/gh/SnowflakePowered/tsuku/branch/master)
 
 tsuku is a C# library that makes cross-platform extended attribute access easy. 
 
