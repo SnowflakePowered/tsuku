@@ -13,7 +13,7 @@ namespace Tsuku
         /// <summary>
         /// The maximum size of an attribute data in bytes.
         /// </summary>
-        public const int MAX_ATTR_SIZE = 4095;
+        public const int MAX_ATTR_SIZE = 512;
 
         /// <summary>
         /// The maximum length of an attribute name, in characters.

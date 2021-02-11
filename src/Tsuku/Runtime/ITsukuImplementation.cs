@@ -22,7 +22,7 @@ namespace Tsuku.Runtime
         /// <param name="info">The <see cref="FileInfo"/> to write.</param>
         /// <param name="name">The name of the attribute to write.</param>
         /// <param name="data">The buffer to write. 
-        /// This must be less than <see cref="Tsuku.MAX_ATTR_SIZE"/> (usually 4096).
+        /// This must be less than <see cref="Tsuku.MAX_ATTR_SIZE"/>.
         /// <strong>This should be verified before calling this function.</strong>
         /// </param>
         /// <param name="followSymlinks">
@@ -38,7 +38,7 @@ namespace Tsuku.Runtime
         /// <param name="info">The <see cref="FileInfo"/> to write.</param>
         /// <param name="name">The name of the attribute to write.</param>
         /// <param name="data">The buffer to write. 
-        /// This must be less than <see cref="Tsuku.MAX_ATTR_SIZE"/> (usually 4096).
+        /// This must be less than <see cref="Tsuku.MAX_ATTR_SIZE"/>.
         /// <strong>This should be verified before calling this function.</strong>
         /// </param>
         /// <param name="followSymlinks">
@@ -53,7 +53,7 @@ namespace Tsuku.Runtime
         /// <param name="info">The <see cref="FileInfo"/> to read.</param>
         /// <param name="name">The name of the attribute to read.</param>
         /// <param name="data">The buffer to read into. 
-        /// This must be less than or equal to <see cref="Tsuku.MAX_ATTR_SIZE"/> (usually 4096).
+        /// This must be less than or equal to <see cref="Tsuku.MAX_ATTR_SIZE"/>.
         /// <strong>This should be verified before calling this function.</strong>
         /// </param>
         /// <param name="followSymlinks">
@@ -75,7 +75,7 @@ namespace Tsuku.Runtime
         /// <param name="info">The <see cref="FileInfo"/> to read.</param>
         /// <param name="name">The name of the attribute to read.</param>
         /// <param name="data">The buffer to read into. 
-        /// This must be less than or equal to <see cref="Tsuku.MAX_ATTR_SIZE"/> (usually 4096).
+        /// This must be less than or equal to <see cref="Tsuku.MAX_ATTR_SIZE"/>.
         /// <strong>This should be verified before calling this function.</strong>
         /// </param>
         /// <param name="followSymlinks">

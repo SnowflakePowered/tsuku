@@ -4,7 +4,7 @@ tsuku is a C# library that makes cross-platform extended attribute access easy.
 
 On Linux and MacOS, this is handled via `getxattr` and `setxattr`. On Windows, alternate data streams are used to imitate this feature.
 
-Note that this is not a full ADS library. The max size of attributes is forcibly limited to 4 kilobytes. Attribute names are also limited to 192 characters max, and are prefixed with '`tsuku`' across all platforms. tsuku only handles file attributes created by tsuku, for safety reasons.
+Note that this is not a full ADS library. The max size of attributes is forcibly limited to 512 bytes. Attribute names are also limited to 192 characters max, and are prefixed with '`tsuku`' across all platforms. tsuku only handles file attributes created by tsuku, for safety reasons.
 
 tsuku's API is very simple and easy to understand.
 

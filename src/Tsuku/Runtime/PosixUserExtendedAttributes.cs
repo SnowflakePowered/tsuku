@@ -14,6 +14,7 @@ namespace Tsuku.Runtime
                 var errno = Syscall.GetLastError();
                 throw errno switch
                 {
+                    Errno.ENOSPC => new IOException("This file has reached the maximum amount of space for extended attributes."),
                     Errno.EPERM => new PlatformNotSupportedException("Unable to set attribute on a read-only file or symbolic link."),
                     Errno.E2BIG => new PlatformNotSupportedException("The target file system does not support the size of the attribute value."),
                     Errno.ENODATA => new FileNotFoundException("The requested attribute was not found."),
