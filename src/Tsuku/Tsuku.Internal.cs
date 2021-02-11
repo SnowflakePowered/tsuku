@@ -18,7 +18,7 @@ namespace Tsuku
         /// <summary>
         /// The maximum length of an attribute name, in characters.
         /// </summary>
-        public const int MAX_NAME_LEN = 192;
+        public const int MAX_NAME_LEN = 120;
         
         private static ITsukuImplementation WINDOWS_NTFS = new NtfsAlternateDataStreams();
         private static ITsukuImplementation UNIX_XATTR = new PosixUserExtendedAttributes();
