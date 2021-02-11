@@ -23,5 +23,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Tsuku\Tsuku.csproj" />
   </ItemGroup>
-
+  <PropertyGroup>
+    <CoverletOutputFormat>opencover,cobertura</CoverletOutputFormat>
+    <Include>[Tsuku]*,[Tsuku.*]*</Include>
+    <Exclude>[Tsuku.Tests*]*</Exclude>
+    <CollectCoverage>true</CollectCoverage>
+  </PropertyGroup>
 </Project>
