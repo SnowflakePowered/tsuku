@@ -4,11 +4,22 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" PrivateAssets="Compile" />
     <PackageReference Include="Vanara.PInvoke.Kernel32" Version="3.3.3" PrivateAssets="Compile" />
   </ItemGroup>
-
+  
+  <PropertyGroup>
+    <Authors>chyyran;Snowflake Authors</Authors>
+    <PackageTags>tags;attributes;alternate data streams;filesystem;xattr;ntfs;ext4;apfs;hfs</PackageTags>
+    <RepositoryUrl>https://github.com/SnowflakePowered/tsuku</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Title>tsuku</Title>
+    <Description>Cross-platform extended file attributes.</Description>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
 </Project>
