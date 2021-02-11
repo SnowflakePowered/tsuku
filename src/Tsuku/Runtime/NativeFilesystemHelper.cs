@@ -4,7 +4,6 @@ using System.IO;
 using System.Text;
 using Vanara.PInvoke;
 using Mono.Unix.Native;
-using Mono.Unix;
 using System.Linq;
 using Tsuku.Runtime.Interop;
 
@@ -15,24 +14,31 @@ namespace Tsuku.Runtime
         private static bool IsSymbolicLink(FileInfo @this)
               => @this.Attributes.HasFlag(FileAttributes.ReparsePoint);
 
-        public static void ResolveSymlinkPosix(ref FileInfo info)
+        private static void ThrowIOErrorIfError(int res)
         {
-            if (!IsSymbolicLink(info))
-                return;
-            var newPath = new StringBuilder();
-            int res = Syscall.readlink(info.FullName, newPath);
             if (res == -1)
             {
-                var errno = Syscall.GetLastError();
-                throw errno switch
+                throw Syscall.GetLastError() switch
                 {
+                    Errno.EIO => new IOException("Unknown IO exception occured."),
                     Errno.ENOENT => new FileNotFoundException("The specified file was not found"),
                     Errno.EACCES => new UnauthorizedAccessException("The caller does not have the required permission."),
                     Errno.ENOTDIR => new DirectoryNotFoundException("The specified path is invalid."),
                     Errno.ENAMETOOLONG => new PathTooLongException("The specified path, file name, or both exceed the system-defined maximum length."),
-                    _ => new Exception($"Unknown exception occured with errno {errno}")
+                    Errno errno => new Exception($"Unknown exception occured with errno {errno}")
                 };
             }
+        }
+
+        public static void ResolveSymlinkPosix(ref FileInfo info)
+        {
+            if (!IsSymbolicLink(info))
+                return;
+            ThrowIOErrorIfError(Syscall.lstat(info.FullName, out var linkInfo));
+
+            var newPath = new StringBuilder((int)linkInfo.st_size + 1);
+            ThrowIOErrorIfError(Syscall.readlink(info.FullName, newPath));
+            
             info = new FileInfo(newPath.ToString());
         }
 
@@ -62,7 +68,7 @@ namespace Tsuku.Runtime
 
         public static string GetDarwinFilesystem(FileInfo fileInfo)
         {
-            Statfs.macos_statfs(fileInfo.FullName, out var statfs);
+            ThrowIOErrorIfError(Statfs.macos_statfs(fileInfo.FullName, out var statfs));
             return statfs.f_fstypename;
         }
 
@@ -70,7 +76,7 @@ namespace Tsuku.Runtime
         {
             // https://man7.org/linux/man-pages/man2/statfs.2.html
             // https://github.com/dotnet/runtime/blob/e8339af091988247c90bd7d347753da05f7e74cd/src/libraries/Common/src/Interop/Unix/System.Native/Interop.MountPoints.FormatInfo.cs
-            Statfs.linux_statfs(fileInfo.FullName, out var statfs);
+            ThrowIOErrorIfError(Statfs.linux_statfs(fileInfo.FullName, out var statfs));
             return statfs.f_type switch
             {
                 0xef53 => "ext4",
@@ -83,9 +89,12 @@ namespace Tsuku.Runtime
         public static string GetWindowsFilesystem(FileInfo fileInfo)
         {
             var rootDir = fileInfo.Directory.Root;
-            var drive = DriveInfo.GetDrives()
-                .Where(d => d?.RootDirectory?.FullName == rootDir?.FullName).FirstOrDefault();
-            return drive?.DriveFormat ?? "Unknown";
+            Kernel32.GetVolumeInformation(rootDir.FullName, out _, out _, out _, out _, out string fsName);
+            if (fsName == null)
+            {
+                Kernel32.GetLastError().ThrowIfFailed();
+            }
+            return fsName!;
         }
     }
 }
