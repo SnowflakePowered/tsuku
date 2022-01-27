@@ -30,7 +30,7 @@ namespace Tsuku.Extensions
         public static void SetAttribute(this FileInfo @this, string name, bool data)
         {
             Span<byte> bytes = stackalloc byte[1];
-            bytes[0] = data ? 1 : 0;
+            bytes[0] = (byte)(data ? 1 : 0);
             @this.SetAttribute(name, bytes);
         }
 
